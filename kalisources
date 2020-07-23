@@ -1,0 +1,147 @@
+#!/bin/bash
+
+#########################
+# a script by lazy-pwny #
+#########################
+
+#renkler.
+kirmizi="\e[91m"
+yesil="\e[92m"
+mavi="\e[34m"
+turuncu="\e[93m"
+tp="\e[0m"
+
+# help heelp HEELğP xD
+if [[ $1 =~ ^(-h|--help|-y|--yardım) ]] ; then
+    echo -e "sources listi sıfırlayın: ./${mavi}sources.bash${turuncu} -s$tp"
+    echo -e "check yapın: ./${mavi}sources.bash$turuncu -c$tp"
+    exit 0
+fi
+
+# HOOP dur yolcu sudo kontrol!
+if [[ $USER = root ]] ; then
+    echo "okey go ahead!" > /dev/null
+else
+    echo -e "$kirmizi Lütfen sudo ile deneyiniz!$tp"
+    exit 1
+fi
+
+
+xsource1="deb http://http.kali.org/kali kali-rolling main non-free contrib"
+xsource2="deb http://http.kali.org/kali kali-last-snapshot main non-free contrib"
+xsource3="deb http://http.kali.org/kali kali-experimental main non-free contrib"
+x="0"
+# CHECK OS
+kalicheck=$(uname -a | awk '{print $3}')
+if [[ $kalicheck = *kali* ]] ; then
+    echo -e "bulundu:$mavi[kali linux]$tp"
+else
+    echo "$kirmizi kali linux işletim sistemine sahip değilsiniz!$tp"
+    exit 1
+fi
+
+# -s
+if [[ $1 = "-s" ]] ; then 
+    echo -ne "$kirmizi sources.list siliniyor$tp " ; rm /etc/apt/sources.list ; echo -e "$yesil[OK]"
+    echo -ne "$mavi sources.list oluşturuluyor$tp " ; touch /etc/apt/sources.list ; echo -e "$yesil[OK]"
+    echo -ne "$mavi depolar ekleniyor [0" ; echo "$xsource1" >> /etc/apt/sources.list ; echo -n "1" ; echo "$xsource2" >> /etc/apt/sources.list ; echo "0]" ; echo "$xsource3" >> /etc/apt/sources.list
+    echo -e "(^_^)$yesil Hazır!"
+fi
+
+# -c
+if [[ $1 = "-c" ]] ; then
+while :; do
+x=$(($x + 1))
+xlist=$(cat /etc/apt/sources.list | awk "NR==${x}")
+
+if [[ $xlist = "$xsource1" ]] ; then
+sc1="yes"
+elif [[ $xlist = "$xsource2" ]] ; then
+sc2="yes"
+elif [[ $xlist = "$xsource3" ]] ; then
+sc3="yes"
+fi
+
+if [[ $xlist = "" ]] ; then
+    if [[ $sc1 = "yes" ]] ; then
+        echo -e "$xsource1 $yesil bulundu!$tp"
+    else
+        echo -e "$xsource1 $kirmizi bulunamadı :($tp"
+    fi
+
+    if [[ $sc2 = "yes" ]] ; then
+        echo -e "$xsource2 $yesil bulundu!$tp"
+    else
+        echo -e "$xsource2 $kirmizi bulunamadı :($tp"
+    fi
+    
+    if [[ $sc3 = "yes" ]] ; then
+        echo -e "$xsource3 $yesil bulundu!$tp"
+    else
+        echo -e "$xsource3 $kirmizi bulunamadı :($tp"
+    fi
+    echo " (*-*) bye!"
+    exit 0
+fi
+done
+fi
+# CHECK SOURCES LIST
+
+if [[ -f /etc/apt/sources.list ]] ; then
+    echo -e "bulundu: $mavi[sources.list$tp@${mavi}/etc/apt]$tp"
+else
+    echo -ne "('-'){¿What? Debian tabanlı bir distroda sources.list yokmu?? Belki silinmiştir? \n Hadi yerine getirelim şunu.}"
+    touch /etc/apt/sources.list && echo -e " [${yesil}OK$tp]"
+fi
+
+# CHECK&PLACE REPOS Bunları neden Türkçe yazmıyorum hiçbir fikrim yoq :D
+while :; do
+x=$(($x + 1))
+xlist=$(cat /etc/apt/sources.list | awk "NR==${x}")
+
+if [[ $xlist = "$xsource1" ]] ; then
+s1="yes"
+elif [[ $xlist = "$xsource2" ]] ; then
+s2="yes"
+elif [[ $xlist = "$xsource3" ]] ; then
+s3="yes"
+fi
+
+if [[ $xlist = "" ]] ; then
+    break
+fi
+done
+
+# we the end
+if [[ $s1 = "" ]] ; then
+    echo -ne "$xsource1 bulunamadı yazılıyor"
+    echo "$xsource1" >> /etc/apt/sources.list && echo -e "$yesil[OK]$tp"
+    elif [[ $s1 = "yes" ]] ; then
+    echo -e "$xsource1 bulundu $mavi[Missing]$tp"
+fi
+
+if [[ $s2 = "" ]] ; then
+    echo -ne "$xsource2 bulunamadı yazılıyor"
+    echo "$xsource2" >> /etc/apt/sources.list && echo -e "$yesil[OK]$tp"
+    elif [[ $s2 = "yes" ]] ; then
+    echo -e "$xsource2 bulundu $mavi[Missing]$tp"
+fi
+
+if [[ $s3 = "" ]] ; then
+    echo -ne "$xsource3 bulunamadı yazılıyor"
+    echo "$xsource3" >> /etc/apt/sources.list && echo -e "$yesil[OK]$tp"
+    elif [[ $s3 = "yes" ]] ; then
+    echo -e "$xsource3 bulundu $mavi[Missing]$tp"
+fi
+echo "-----------------------------Update-----------------------------"
+apt update
+echo "-----------------------------Upgrade----------------------------"
+read -t 5 -r -p "Upgrade Edilsinmi? (5sn) [e/H] " cevap
+case "$cevap" in
+    [eE])
+        apt upgrade -y
+        ;;
+    *)
+        echo -e "\nbye! ('-')"
+        ;;
+esac
