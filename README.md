@@ -7,3 +7,5 @@ $ cd kalisources
 $ chmod +x kalisources
 $ sudo ./kalisources
 ```
+* kullanımı çok kolaydır yetkilendirdikten sonra sadece `sudo ./kalisources` yeterli.
+* yardım almak için `./kalşsources -h`
